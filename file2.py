@@ -15,7 +15,7 @@ os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 
 # In[77]:
 
-
+from file1 import setup_get_hp, detect_hp
 import random
 import gym
 import numpy as np
@@ -30,22 +30,22 @@ from keras.optimizers import Adam
 
 # In[78]:
 
-env_name = 'MountainCar-v0'
+env_name = 'Shadow fight 2'
 
-env = gym.make(env_name)
+#env = gym.make(env_name)
 
 
 # In[79]:
 
 
-state_size = env.observation_space.shape[0]
+state_size = 1
 
 
 
 # In[ ]:
 
 
-action_size = env.action_space.n
+action_size = 23
 
 
 # In[ ]:
@@ -156,8 +156,12 @@ for e in range(n_episodes):
         action = agent.act(state)
         
         next_state, reward, done, _ = env.step(action)
-        
-        reward = reward if not done else -10
+
+
+
+
+
+        reward = reward if not done else 0
         
         next_state = np.reshape(next_state, [1, state_size])
         
