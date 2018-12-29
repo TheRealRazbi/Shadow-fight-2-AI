@@ -31,7 +31,7 @@ def detect_hp(region_of_ally, region_of_enemy):
    # return reward
     remaining_ally_life = count1 / screen.shape[1]# * 100
     remaining_enemy_life = count2 / screen2.shape[1]# * 100
-    if remaining_enemy_life == 0 or remaining_ally_life == 0.:
+    if remaining_enemy_life == 0 or remaining_ally_life == 0:
         done = False
     else:
         done = True
