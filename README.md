@@ -6,8 +6,11 @@ This project is about a DQN agent trying to play Shadow Fight 2 using visual inp
 Status :
 
 File1 : working 
+
 File2 : in progress
+
 Example : [This is just an example of a working DQN that works on the cartpole game using openai gym] working
+
 
 Screen_Grabber : working [not made by me btw]
 
