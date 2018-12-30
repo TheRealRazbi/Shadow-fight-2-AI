@@ -9,7 +9,7 @@ import win32con
 import win32api
 
 
-def grab_screen(region=None):
+def grab_screen(region=None, color='Gray'):
     hwin = win32gui.GetDesktopWindow()
 
     if region:
@@ -39,5 +39,12 @@ def grab_screen(region=None):
     win32gui.ReleaseDC(hwin, hwindc)
     win32gui.DeleteObject(bmp.GetHandle())
 
-    return cv2.cvtColor(img, cv2.COLOR_BGRA2GRAY)
+    if color.upper() == 'RGB':
+        color = cv2.COLOR_BGRA2RGB
+    elif color.upper() == 'GRAY':
+        color = cv2.COLOR_BGRA2GRAY
+    elif color.upper() == 'BGR':
+        color = cv2.COLOR_BGRA2BGR
+
+    return cv2.cvtColor(img, color)
 
