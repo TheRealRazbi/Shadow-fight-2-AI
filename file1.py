@@ -8,12 +8,14 @@ def setup_get_hp():
     if actual_zone == None:
         raise Exception('Bluestacks Not found')
 
+    actual_zone = [actual_zone[0], actual_zone[1]]
+
     region_of_ally = [actual_zone[0] + 222, actual_zone[1] + 98,
                       actual_zone[0] + 381, actual_zone[1] + 98]
     region_of_enemy = [actual_zone[0] + 446, actual_zone[1] + 98,
                        actual_zone[0] + 605, actual_zone[1] + 98]
 
-    return region_of_ally, region_of_enemy
+    return region_of_ally, region_of_enemy, actual_zone
 
 
 def detect_hp(region_of_ally, region_of_enemy):
@@ -42,8 +44,75 @@ def detect_hp(region_of_ally, region_of_enemy):
     result = [remaining_ally_life, remaining_enemy_life, done]
     return result
 
+
+def get_visual_input(bluestacks_position):
+    region = [bluestacks_position[0] + 10, bluestacks_position[1] + 42,
+              bluestacks_position[0] + 820, bluestacks_position[1] + 500]
+
+
+
+    result = grab_screen(region)
+
+   # cv2.imshow('test', result)
+   # if cv2.waitKey(25) & 0xFF == ord('q'):
+   #     cv2.destroyAllWindows()
+
+    return result
+
+
+def detect_start(visual_input):
+
+    template = cv2.imread('timer.png', 0)
+
+    w, h = template.shape[::-1]
+
+    result = cv2.matchTemplate(visual_input, template, cv2.TM_CCOEFF_NORMED)
+    threshold = 0.85
+
+    loc = np.where(result >= threshold)
+
+    for pt in zip(*loc[::-1]):
+        cv2.rectangle(visual_input, pt, (pt[0] + w, pt[1] + h), (0, 255, 255), 2)
+        return True
+
+    return False
+
+
+def detect_paused(visual_input):
+
+    template = cv2.imread('pause.png', 0)
+
+    w, h = template.shape[::-1]
+
+    result = cv2.matchTemplate(visual_input, template, cv2.TM_CCOEFF_NORMED)
+    threshold = 0.85
+
+    loc = np.where(result >= threshold)
+
+    for pt in zip(*loc[::-1]):
+        cv2.rectangle(visual_input, pt, (pt[0] + w, pt[1] + h), (0, 255, 255), 2)
+        return False
+
+    return True
+
+
 if __name__ == '__main__':
-    region_of_ally, region_of_enemy = setup_get_hp()
+    region_of_ally, region_of_enemy, bluestacks_position = setup_get_hp()
 
     while True:
-        print(detect_hp(region_of_ally, region_of_enemy))
+        pass
+        #print(detect_hp(region_of_ally, region_of_enemy))
+        #visual_input = get_visual_input(bluestacks_position)
+
+        #result = detect_paused(visual_input)
+
+
+
+
+
+
+
+
+
+
+
