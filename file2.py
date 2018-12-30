@@ -15,13 +15,13 @@ os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 
 # In[77]:
 
-from file1 import setup_get_hp, detect_hp
+from file1 import setup_get_hp, detect_hp, detect_start, detect_paused, get_visual_input
 import random
 import gym
 import numpy as np
 from collections import deque
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Convolution2D
 from keras.optimizers import Adam
 #import os
 
@@ -52,7 +52,7 @@ action_size = 23
 
 
 batch_size = 32
-n_episodes = 1001
+n_episodes = 2
 
 
 # In[ ]:
@@ -141,12 +141,13 @@ agent = DQNAgent(state_size, action_size)
 
 # In[ ]:
 
+region_of_ally, region_of_enemy, bluestacks_position = setup_get_hp()
 
-done = False
 for e in range(n_episodes):
-    
-    state = env.reset()
-    state = np.reshape(state, [1, state_size])
+    visual_input = get_visual_input(bluestacks_position)
+    while not detect_paused(visual_input) and not detect_start(visual_input):
+        visual_input = get_visual_input(bluestacks_position)
+   # state = np.reshape(state, [1, state_size])
     
     for time in range(50000):
         
