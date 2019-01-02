@@ -24,7 +24,11 @@ will detect hp bars that aren't there because it just compares the hp values.
 
 #### Update : Now by using the 2 new functions you can see when the rounds are paused or when the rounds just started
 
+#### Update : Now you can give input to the game [list of inputs is unfinished]
+
 ### File 2 : It's supposed to be the main file , because it will be a remade version of "Example" 
+
+### Update : I replaced most of the variables with variables got from File1 , it needs the rest of the actions and it SHOULD work
 
 ### Example : working , but has no use more than an example in case I mess up the file
 
