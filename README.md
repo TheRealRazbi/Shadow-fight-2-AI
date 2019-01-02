@@ -18,9 +18,7 @@ Screen_Grabber : working [not made by me btw]
 ## Usage:
 
 ### File 1 : It has been tested on an 1080p resolution , to make it work you need bluestacks in the smallest window size you can get
-after that just open shadow fight 2 and when you run the code it will detect the hp bars of you and the enemy and will say
-if the round is finished or not. Note that it won't work if you move bluestacks after the code started and sometimes the code
-will detect hp bars that aren't there because it just compares the hp values.
+after that just open shadow fight 2 and then you can use functions from file1 to detect the HP bars and if the round is DONE or not , you will see examples on how to use them , down in the first file , they are just commented-out
 
 #### Update : Now by using the 2 new functions you can see when the rounds are paused or when the rounds just started
 
