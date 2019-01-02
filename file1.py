@@ -2,6 +2,7 @@ from screen_grabber import grab_screen
 import cv2
 import pyautogui
 import numpy as np
+import time
 
 def setup_get_hp():
     actual_zone = pyautogui.locateOnScreen('blustack.png')
@@ -45,7 +46,8 @@ def detect_hp(region_of_ally, region_of_enemy):
     return result
 
 
-def get_visual_input(bluestacks_position):
+def get_visual_input(bluestacks_position, delay=0):
+    time.sleep(delay)
     region = [bluestacks_position[0] + 10, bluestacks_position[1] + 42,
               bluestacks_position[0] + 820, bluestacks_position[1] + 500]
 
@@ -96,11 +98,70 @@ def detect_paused(visual_input):
     return True
 
 
+def actually_act(chosen_action, bluestacks_postion, verbose=1):
+        if chosen_action == 1:
+            chosen_action = 'block'
+        elif chosen_action == 2:
+            chosen_action = 'punch_once'
+        elif chosen_action == 3:
+            chosen_action = 'punch_twice'
+        elif chosen_action == 4:
+            chosen_action = 'right_dash_punch_once'
+        elif chosen_action == 5:
+            chosen_action = 'right_dash_punch_twice'
+        elif chosen_action == 6:
+            chosen_action = 'left_dash_punch'
+
+
+
+
+
+        if verbose == 1:
+            print(chosen_action)
+        action_converter(chosen_action, bluestacks_position)
+
+def action_converter(action, bluestacks_position):
+    come_back = pyautogui.position()
+    pyautogui.click(bluestacks_position[0] + 200, bluestacks_position[1] + 200)
+    if action == 'block':  # 1
+        pass
+    elif action == 'punch_once':  # 2
+        pyautogui.press('i')
+    elif action == 'punch_twice':  # 3
+        pyautogui.press('i')
+        pyautogui.press('i')
+    elif action == 'right_dash_punch_once':  # 4
+        pyautogui.keyDown('d')
+        pyautogui.press('i')
+        pyautogui.keyUp('d')
+    elif action == 'right_dash_punch_twice':  # 5
+        pyautogui.keyDown('d')
+        pyautogui.press('i')
+        pyautogui.press('i')
+        pyautogui.keyUp('d')
+    elif action == 'left_dash_punch':  # 6
+        pyautogui.keyDown('a')
+        pyautogui.press('i')
+        pyautogui.keyUp('a')
+
+
+
+
+    pyautogui.moveTo(come_back)
+
+    time.sleep(0.4)
+
 if __name__ == '__main__':
     region_of_ally, region_of_enemy, bluestacks_position = setup_get_hp()
+    current_time = time.time()
+    actually_act(6, bluestacks_position)
+
+
 
     while True:
         pass
+        #print(float(time.time() - current_time))
+
         #print(detect_hp(region_of_ally, region_of_enemy))
         #visual_input = get_visual_input(bluestacks_position)
 
@@ -109,10 +170,20 @@ if __name__ == '__main__':
 
 
 
-
-
-
-
-
+'''
+list of moves:
+1  = block
+2  = punch_once
+3  = punch_twice
+4  = right_dash_punch_once
+5  = right_dash_punch_twice
+6  = left_dash_punch
+7  = 
+8  = 
+9  = 
+10 = 
+11 = 
+12 = 
+'''
 
 
