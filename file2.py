@@ -147,20 +147,24 @@ for e in range(n_episodes):
     visual_input = get_visual_input(bluestacks_position)
     while not detect_paused(visual_input) and not detect_start(visual_input):
         visual_input = get_visual_input(bluestacks_position)
-   # state = np.reshape(state, [1, state_size])
+        print('waiting match to start')
+
+    state = get_visual_input(bluestacks_position)
+    state = np.reshape(state, [1, state_size])
     
     for time in range(50000):
-        
 
        # env.render()
         
         action = agent.act(state)
         
-        next_state, reward, done, _ = env.step(action)
+        #next_state, reward, done, _ = env.step(action)
+        reward_data = detect_hp(region_of_ally, region_of_enemy)
+        reward = reward_data[0] * 2 - reward_data[1]
 
+        done = reward_data[2]
 
-
-
+        next_state = get_visual_input(bluestacks_position, delay=0.4)
 
         reward = reward if not done else 0
         
