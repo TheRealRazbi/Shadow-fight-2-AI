@@ -48,7 +48,7 @@ state_size = 1
 # In[ ]:
 
 
-action_size = 20
+action_size = 22
 
 
 # In[ ]:
@@ -61,7 +61,8 @@ n_episodes = 2
 # In[ ]:
 
 
-output_dir = 'model_output/{}'.format(env_name)
+output_dir = 'D:/Python Workshop/Shadow fight 2 MODELS/temp/{}'.format(env_name)
+search_dir = 'D:/Python Workshop/Shadow fight 2 MODELS/temp'
 if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
@@ -72,7 +73,7 @@ if not os.path.exists(output_dir):
 
 
 class DQNAgent:
-    
+
 
     def __init__(self, state_size, action_size):
         self.state_size = state_size
@@ -80,16 +81,17 @@ class DQNAgent:
         
         self.memory = deque(maxlen=3000)
         
-        self.gamma = 0.90
+        self.gamma = 0.80
         
-        self.epsilon = 1.0
+        self.epsilon = 0.20
         self.epsilon_decay = 0.999
         self.epsilon_min = 0.01
         
         self.learning_rate = 0.001
         
         self.model = self._build_model()
-            
+
+
     def _build_model(self):
 
         model = Sequential()
@@ -112,6 +114,7 @@ class DQNAgent:
         model.add(Dense(action_size, activation='softmax'))
         model.compile(loss='mse', optimizer=Adam(lr=self.learning_rate))
 
+
         return model
     
         
@@ -121,6 +124,8 @@ class DQNAgent:
     def act(self, state):
         if np.random.rand() <= self.epsilon:
             return random.randrange(self.action_size)
+
+        state = state.reshape((1, state.shape[0], state.shape[1], 1))
         act_values = self.model.predict(state)
         return np.argmax(act_values[0])
     
@@ -130,11 +135,10 @@ class DQNAgent:
     
         for state, action, reward, next_state, done in minibatch:
             target = reward
-            state = next_state.reshape((1, state.shape[0], state.shape[1], 1))
+            state = state.reshape((1, state.shape[0], state.shape[1], 1))
 
             if not done:
                 next_state = next_state.reshape((1, next_state.shape[0], next_state.shape[1], 1))
-                print(next_state.shape)
                 target = (reward + self.gamma * np.amax(self.model.predict(next_state)[0]))
             target_f = self.model.predict(state)
             target_f[0][action] = target
@@ -146,25 +150,57 @@ class DQNAgent:
             
     def load(self, name):
         self.model = load_model(name)
-        
+
     def save(self, name):
         self.model.save(name)
 
 
 # In[ ]:
+def find_episode_trained(dir):
+    result = []
+    for filename in os.listdir(dir):
 
+        if filename.endswith('.hdf5'):
+            filename = int(filename[15:19])
+            result.append(filename)
+    try:
+        result = max(result)
+    except ValueError:
+        print("No training_file")
+        result = 0
+    return result
+
+def keep_only_last_one(dir, episodes):
+    for filename in os.listdir(dir):
+        if filename.endswith('.hdf5'):
+            match = 'Shadow fight 2_{}.hdf5'.format(episodes)
+            if match != filename:
+                os.remove(dir + '/ '+ filename)
+
+#episodes_trained = 6
+episodes_trained = find_episode_trained(search_dir)  # finds episode based on dir
+print("found", episodes_trained)
+
+if episodes_trained < 9:
+    episodes_trained = '000' + str(episodes_trained)
+elif episodes_trained > 9:
+    episodes_trained = '00' + str(episodes_trained)
+
+keep_only_last_one(search_dir, episodes_trained)  # this keeps only the best
 
 agent = DQNAgent(state_size, action_size)
-
+agent.epsilon = int(100 - int(episodes_trained) * 2.5) / 100
+if int(episodes_trained) > 0:
+    agent.model_load_name = 'Shadow fight 2_{}.hdf5'.format(episodes_trained) ####loads
 
 # #### Interact with environment
-
+episodes = episodes_trained
 # In[ ]:
 
 region_of_ally, region_of_enemy, bluestacks_position = setup_get_hp()
 
 for e in range(n_episodes):
-    global e
+
     visual_input = get_visual_input(bluestacks_position)
     while not detect_paused(visual_input) or not detect_start(visual_input):
         visual_input = get_visual_input(bluestacks_position)
@@ -184,7 +220,7 @@ for e in range(n_episodes):
         
         #next_state, reward, done, _ = env.step(action)
         reward_data = detect_hp(region_of_ally, region_of_enemy)
-        reward = reward_data[0] * 2 - reward_data[1]
+        reward = reward_data[0] * 1.5 - reward_data[1]
 
         done = reward_data[2]
 
@@ -214,9 +250,6 @@ for e in range(n_episodes):
             pyautogui.moveTo(come_back)
             break
 
-
-
-
     if len(agent.memory) > batch_size:
         print('training')
         come_back = pyautogui.position()
@@ -227,11 +260,19 @@ for e in range(n_episodes):
         pyautogui.click(bluestacks_position[0] + 200, bluestacks_position[1] + 200)
         pyautogui.press('esc')
         pyautogui.moveTo(come_back)
-    
-    if e % 50 == 0:
-        agent.save(output_dir + "_" + '{:04d}'.format(e) + ".hdf5")
 
-agent.save(output_dir + "_" + '{:04d}'.format(e) + ".hdf5")
+come_back = pyautogui.position()
+pyautogui.click(bluestacks_position[0] + 200, bluestacks_position[1] + 200)
+pyautogui.press('p')
+pyautogui.moveTo(come_back)
+print("done")
+#    if e % 50 == 0:
+#        agent.save(output_dir + "_" + '{:04d}'.format(e) + ".hdf5")
+
+
+episodes = int(episodes) + n_episodes
+agent.save(output_dir + "_" + '{:04d}'.format(episodes) + ".hdf5")
+
 
 
 
