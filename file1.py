@@ -100,8 +100,10 @@ def detect_paused(visual_input):
 
 
 def actually_act(chosen_action, bluestacks_position, verbose=1):
-        if chosen_action == 1 or chosen_action == 0:
+        if chosen_action == 0:
             chosen_action = 'block'
+        elif chosen_action == 1:
+            chosen_action = 'jump_left'
         elif chosen_action == 2:
             chosen_action = 'punch_once'
         elif chosen_action == 3:
@@ -127,7 +129,7 @@ def actually_act(chosen_action, bluestacks_position, verbose=1):
         elif chosen_action == 13:
             chosen_action = 'jump_kick'
         elif chosen_action == 14:
-            chosen_action = 'axe_kick'
+            chosen_action = 'jump_right'
         elif chosen_action == 15:
             chosen_action = 'sweep'
         elif chosen_action == 16:
@@ -140,6 +142,12 @@ def actually_act(chosen_action, bluestacks_position, verbose=1):
             chosen_action = 'dash_right'
         elif chosen_action == 20:
             chosen_action = 'dash_left'
+        elif chosen_action == 21:
+            chosen_action = 'roll_left'
+        elif chosen_action == 22:
+            chosen_action = 'roll_right'
+
+
 
         if verbose == 1:
             print(chosen_action)
@@ -149,7 +157,7 @@ def actually_act(chosen_action, bluestacks_position, verbose=1):
 def action_converter(action, bluestacks_position):
     come_back = pyautogui.position()
     pyautogui.click(bluestacks_position[0] + 200, bluestacks_position[1] + 200)
-    if action == 'block':  # 1
+    if action == 'block':  # 0
         pass
     elif action == 'punch_once':  # 2
         pyautogui.press('i')
@@ -197,20 +205,15 @@ def action_converter(action, bluestacks_position):
         pyautogui.keyDown('w')
         pyautogui.press('j')
         pyautogui.keyUp('w')
-    elif action == 'axe_kick':  # 14
-        pyautogui.keyDown('w')
-        pyautogui.keyDown('a')
-        pyautogui.press('j')
-        pyautogui.keyUp('w')
-        pyautogui.keyUp('a')
     elif action == 'sweep':  # 15
         pyautogui.keyDown('s')
         pyautogui.press('j')
         pyautogui.keyUp('s')
     elif action == 'double_sweep':  # 16
-        pyautogui.keyDown('w')
+        pyautogui.keyDown('s')
         pyautogui.press('j')
-        pyautogui.keyUp('w')
+        pyautogui.press('j')
+        pyautogui.keyUp('s')
     elif action == 'spinning_step':  # 17
         pyautogui.keyDown('s')
         pyautogui.keyDown('d')
@@ -233,6 +236,26 @@ def action_converter(action, bluestacks_position):
         pyautogui.keyUp('a')
         pyautogui.keyDown('a')
         pyautogui.keyUp('a')
+    elif action == 'roll_left':  # 21
+        pyautogui.keyDown('a')
+        pyautogui.keyDown('s')
+        pyautogui.keyUp('a')
+        pyautogui.keyUp('s')
+    elif action == 'roll_right':  # 22
+        pyautogui.keyDown('d')
+        pyautogui.keyDown('s')
+        pyautogui.keyUp('d')
+        pyautogui.keyUp('s')
+    elif action == 'jump_left':  # 1
+        pyautogui.keyDown('a')
+        pyautogui.keyDown('w')
+        pyautogui.keyUp('a')
+        pyautogui.keyUp('w')
+    elif action == 'jump_right':  # 14
+        pyautogui.keyDown('d')
+        pyautogui.keyDown('w')
+        pyautogui.keyUp('d')
+        pyautogui.keyUp('w')
 
     pyautogui.moveTo(come_back)
 
@@ -241,14 +264,14 @@ def action_converter(action, bluestacks_position):
 if __name__ == '__main__':
     region_of_ally, region_of_enemy, bluestacks_position = setup_get_hp()
     current_time = time.time()
-    actually_act(19, bluestacks_position)
-
+    actually_act(14, bluestacks_position)
 
 
     while True:
-        visual_input = get_visual_input(bluestacks_position)
-        visual_input = np.array(visual_input / 255)
-        print(visual_input.shape)
+        pass
+      #  visual_input = get_visual_input(bluestacks_position)
+       # visual_input = np.array(visual_input / 255)
+        #print(visual_input.shape)
         #print(float(time.time() - current_time))
 
         #print(detect_hp(region_of_ally, region_of_enemy))
@@ -261,7 +284,8 @@ if __name__ == '__main__':
 
 '''
 list of moves:
-1  = block
+0  = block
+1  = jump_left
 2  = punch_once
 3  = move_right
 4  = move_left
@@ -274,13 +298,19 @@ list of moves:
 11 = front_kick
 12 = back_kick
 13 = jump_kick
-14 = axe_kick
+14 = jump_right
 15 = sweep
 16 = double_sweep
 17 = spinning_step
 18 = horse_kick
 19 = dash_right
 20 = dash_left
+21 = roll_left
+22 = roll_right
+23 = jump_left
+
+
+#note there are more block moves because I remvove useless moves
 '''
 
 
