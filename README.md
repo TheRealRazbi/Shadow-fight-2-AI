@@ -15,28 +15,21 @@ Example : [This is just an example of a working DQN that works on the cartpole g
 Screen_Grabber : working [not made by me btw]
 
 
+
 ## Usage:
 
-### File 1 : It has been tested on an 1080p resolution , to make it work you need bluestacks in the smallest window size you can get
-after that just open shadow fight 2 and you run file2 [file1 just holds important functions is the place to test them] , it will do random stuff as it tries to learn , an episode equals 1 round and its considered started if on the screen the timer shows 98 and the game is not paused. Currently you have to manually start rounds , it may be a auto-train in the future
+### File 1 : It has been tested on an 1080p resolution and not any other resolution , not sure if it works on other resolutions. Open bluestacks and open it in the smallest possible size then open the game. With file1 you can test the already working functions , from detecting the timer , if the round is paused, hp bars. HINT : To get bluestacks position you need to use the setup function
 
 
-## Update : Now by using the 2 new functions you can see when the rounds are paused or when the rounds just started
 
-## Update : Now you can give input to the game [list of inputs is unfinished]
+### File 2 :  With file2 is the actually AI kinda working , you will have to setup a save dir at the end of the file [Also the model is 2GB per save and it saves when it finishes the episodes] Each episode = 1 round in game and a round is recognized if it sees it's start. Only the latest model will be used [with the highest amount of episodes not necesary the newest] .
 
-## Update : Removed some of the useless moves
 
-### File 2 : It's supposed to be the main file , because it will be a remade version of "Example" 
+#### Update : Added auto-save and auto-load and can be easily changed, changed epsilon based on the episodes played already
 
-## Update : Added auto-save and auto-load and can be easily changed, changed epsilon based on the episodes played already
 
-## Update : It's working as intended now [it's usage is in the USAGE up there]
-
-## Update : I replaced most of the variables with variables got from File1 , it needs the rest of the actions and it SHOULD work
-
-### Example : working , but has no use more than an example in case I mess up the file
+### Example : working , but has no use more than an example in case I mess up the file2
 
 ### Screen_Grabber : it's obvious what it does
 
-## Update : now you can specify the color of the image
+#### Update : now you can specify the color of the image
