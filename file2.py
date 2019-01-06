@@ -3,11 +3,9 @@
 
 # # Cartpole DQN
 
-# In[76]:
-
 
 import os
-os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+#os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 # os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 
@@ -25,9 +23,7 @@ from keras.models import Sequential, load_model
 from keras.layers import Dense, Conv2D, MaxPooling2D
 from keras.layers import Dropout, Flatten
 from keras.optimizers import Adam
-#import os
 import time
-
 
 # ## Set Parameters
 
@@ -228,21 +224,20 @@ for e in range(n_episodes):
         reward = -reward_data[1] * 2 - (80 - timer)
         if reward_data[1] == 0:
             reward = 100
+        
 
-        done = reward_data[2]
 
         next_state = get_visual_input(bluestacks_position, delay=0.3, for_nn=True)  # 0.3
         next_state = np.array(next_state/255)
-        reward = reward if not done else 0
+      #  reward = reward if not done else 0
         
       #  next_state = np.reshape(next_state, [1, state_size])
 
-
+        done = reward_data[2]
 
         agent.remember(state, action, reward, next_state, done)
         
         state = next_state
-
 
         if done:
             print("episode : {}/{}, score : {}, e : {:.2}".format(e, n_episodes, iteration, agent.epsilon))
@@ -280,7 +275,7 @@ print("done")
 episodes = int(episodes) + n_episodes
 agent.save(output_dir + "_" + '{:04d}'.format(episodes) + ".hdf5")
 
-
-
+os.system('automater.py')
+quit()
 
 
