@@ -50,7 +50,7 @@ def detect_hp(region_of_ally, region_of_enemy):
     return result
 
 
-def get_visual_input(bluestacks_position, delay=0, for_nn=False):
+def get_visual_input(bluestacks_position, delay=0.0, for_nn=False, show=False):
     time.sleep(delay)
     region = [bluestacks_position[0] + 10, bluestacks_position[1] + 42,
               bluestacks_position[0] + 820, bluestacks_position[1] + 500]
@@ -59,21 +59,39 @@ def get_visual_input(bluestacks_position, delay=0, for_nn=False):
 
         result = grab_screen(region)
 
+        if show:
 
-       # cv2.imshow('test', result)
-      #  if cv2.waitKey(25) & 0xFF == ord('q'):
-       #     cv2.destroyAllWindows()
+            cv2.imshow('test', result)
+            if cv2.waitKey(25) & 0xFF == ord('q'):
+                cv2.destroyAllWindows()
 
         return result
     else:
         result = []
         result1 = grab_screen(region)
+        if show:
+            cv2.imshow('frame1', result1)
+            if cv2.waitKey(25) & 0xFF == ord('q'):
+                cv2.destroyAllWindows()
+
         result.append(result1)
         result2 = grab_screen(region)
+        if show:
+            cv2.imshow('frame2', result2)
+            if cv2.waitKey(25) & 0xFF == ord('q'):
+                cv2.destroyAllWindows()
         result.append(result2)
         result3 = grab_screen(region)
+        if show:
+            cv2.imshow('frame3', result3)
+            if cv2.waitKey(25) & 0xFF == ord('q'):
+                cv2.destroyAllWindows()
         result.append(result3)
         result4 = grab_screen(region)
+        if show:
+            cv2.imshow('frame4', result4)
+            if cv2.waitKey(25) & 0xFF == ord('q'):
+                cv2.destroyAllWindows()
         result.append(result4)
 
         result = np.array(result)
@@ -346,12 +364,11 @@ if __name__ == '__main__':
     region_of_ally, region_of_enemy, bluestacks_position = setup_get_hp()
     current_time = time.time()
 
-
     while True:
-        visual_input = get_visual_input(bluestacks_position, for_nn=True)
-
-
-        time.sleep(0.1)
+        visual_input = get_visual_input(bluestacks_position, for_nn=True, show=True, delay=0.3)
+        print("time elapsed", float(-current_time+time.time()))
+        current_time = time.time()
+     #   time.sleep(999)
        # visual_input = np.array(visual_input / 255)
         #print(visual_input.shape)
         #print(float(time.time() - current_time))
