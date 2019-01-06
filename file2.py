@@ -16,7 +16,7 @@ os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 # In[77]:
 
 from file1 import setup_get_hp, detect_hp, detect_start, detect_paused, get_visual_input
-from file1 import actually_act
+from file1 import actually_act, detect_time
 import random
 import pyautogui
 import numpy as np
@@ -32,7 +32,7 @@ import time
 # ## Set Parameters
 
 # In[78]:
-
+timer_model = load_model('time_reader.hdf5')
 env_name = 'Shadow fight 2'
 
 #env = gym.make(env_name)
@@ -55,7 +55,7 @@ action_size = 22
 
 
 batch_size = 8
-n_episodes = 2
+n_episodes = 3
 
 
 # In[ ]:
@@ -123,9 +123,10 @@ class DQNAgent:
     
     def act(self, state):
         if np.random.rand() <= self.epsilon:
+            print("Next action : random")
             return random.randrange(self.action_size)
-
-        state = state.reshape((1, state.shape[0], state.shape[1], 1))
+        print("Next action : not random")
+        state = state.reshape((state.shape[0], state.shape[1], state.shape[2], 1))
         act_values = self.model.predict(state)
         return np.argmax(act_values[0])
     
@@ -135,10 +136,10 @@ class DQNAgent:
     
         for state, action, reward, next_state, done in minibatch:
             target = reward
-            state = state.reshape((1, state.shape[0], state.shape[1], 1))
+            state = state.reshape((state.shape[0], state.shape[1], state.shape[2], 1))
 
             if not done:
-                next_state = next_state.reshape((1, next_state.shape[0], next_state.shape[1], 1))
+                next_state = next_state.reshape((state.shape[0], next_state.shape[1], next_state.shape[2], 1))
                 target = (reward + self.gamma * np.amax(self.model.predict(next_state)[0]))
             target_f = self.model.predict(state)
             target_f[0][action] = target
@@ -186,15 +187,18 @@ if episodes_trained < 9:
 elif episodes_trained > 9:
     episodes_trained = '00' + str(episodes_trained)
 
-keep_only_last_one(search_dir, episodes_trained)  # this keeps only the best
+#keep_only_last_one(search_dir, episodes_trained)  # this keeps only the best
 
 agent = DQNAgent(state_size, action_size)
 agent.epsilon = int(100 - int(episodes_trained) * 2.5) / 100
+if agent.epsilon < 0.25:
+    agent.epsilon = 0.25
 if int(episodes_trained) > 0:
     agent.model_load_name = 'Shadow fight 2_{}.hdf5'.format(episodes_trained) ####loads
 
 # #### Interact with environment
 episodes = episodes_trained
+level = 'ch1_survival'
 # In[ ]:
 
 region_of_ally, region_of_enemy, bluestacks_position = setup_get_hp()
@@ -202,12 +206,12 @@ region_of_ally, region_of_enemy, bluestacks_position = setup_get_hp()
 for e in range(n_episodes):
 
     visual_input = get_visual_input(bluestacks_position)
-    while not detect_paused(visual_input) or not detect_start(visual_input):
+    while not detect_paused(visual_input) or not detect_time(bluestacks_position, timer_model, detect_paused(visual_input), detect_start=True):
         visual_input = get_visual_input(bluestacks_position)
         print('waiting match to start')
         time.sleep(0.1)
 
-    state = get_visual_input(bluestacks_position)
+    state = get_visual_input(bluestacks_position, for_nn=True)
     state = np.array(state / 255)
    # state = np.reshape(state, [1, state_size])
     #state.shape
@@ -220,11 +224,14 @@ for e in range(n_episodes):
         
         #next_state, reward, done, _ = env.step(action)
         reward_data = detect_hp(region_of_ally, region_of_enemy)
-        reward = reward_data[0] * 1.5 - reward_data[1]
+        timer = detect_time(bluestacks_position, timer_model, detect_paused(visual_input))
+        reward = -reward_data[1] * 2 - (80 - timer)
+        if reward_data[1] == 0:
+            reward = 100
 
         done = reward_data[2]
 
-        next_state = get_visual_input(bluestacks_position, delay=0.3)
+        next_state = get_visual_input(bluestacks_position, delay=0.3, for_nn=True)  # 0.3
         next_state = np.array(next_state/255)
         reward = reward if not done else 0
         
