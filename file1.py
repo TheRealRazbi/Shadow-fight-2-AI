@@ -3,6 +3,10 @@ import cv2
 import pyautogui
 import numpy as np
 import time
+import os
+from keras.models import load_model
+
+timer_model = load_model('time_reader.hdf5')
 
 def setup_get_hp():
     actual_zone = pyautogui.locateOnScreen('blustack.png')
@@ -46,26 +50,42 @@ def detect_hp(region_of_ally, region_of_enemy):
     return result
 
 
-def get_visual_input(bluestacks_position, delay=0):
+def get_visual_input(bluestacks_position, delay=0, for_nn=False):
     time.sleep(delay)
     region = [bluestacks_position[0] + 10, bluestacks_position[1] + 42,
               bluestacks_position[0] + 820, bluestacks_position[1] + 500]
 
+    if for_nn is False:
+
+        result = grab_screen(region)
 
 
-    result = grab_screen(region)
+       # cv2.imshow('test', result)
+      #  if cv2.waitKey(25) & 0xFF == ord('q'):
+       #     cv2.destroyAllWindows()
 
+        return result
+    else:
+        result = []
+        result1 = grab_screen(region)
+        result.append(result1)
+        result2 = grab_screen(region)
+        result.append(result2)
+        result3 = grab_screen(region)
+        result.append(result3)
+        result4 = grab_screen(region)
+        result.append(result4)
 
-   # cv2.imshow('test', result)
-   # if cv2.waitKey(25) & 0xFF == ord('q'):
-   #     cv2.destroyAllWindows()
+        result = np.array(result)
 
-    return result
+ #       print(result.shape)
+#        time.sleep(999)
 
+        return result
 
-def detect_start(visual_input):
+def detect_start(visual_input, level):
 
-    template = cv2.imread('timer.png', 0)
+    template = cv2.imread('{}.png'.format(level), 0)
 
     w, h = template.shape[::-1]
 
@@ -99,7 +119,7 @@ def detect_paused(visual_input):
     return True
 
 
-def actually_act(chosen_action, bluestacks_position, verbose=1):
+def actually_act(chosen_action, bluestacks_position, verbose=1, lock=False):
         if chosen_action == 0:
             chosen_action = 'block'
         elif chosen_action == 1:
@@ -151,10 +171,71 @@ def actually_act(chosen_action, bluestacks_position, verbose=1):
 
         if verbose == 1:
             print(chosen_action)
-        action_converter(chosen_action, bluestacks_position)
+        action_converter(chosen_action, bluestacks_position, lock=True)
 
+def get_timer_area(bluestacks_position, direction='left', show=False, save=False, save_dir=None):
+    count = 0
 
-def action_converter(action, bluestacks_position):
+    region = [bluestacks_position[0] + 390, bluestacks_position[1] + 60,
+              bluestacks_position[0] + 415, bluestacks_position[1] + 100]
+
+    if direction is 'right':
+        region = region[0]+25, region[1], region[2]+25, region[3]
+
+    if show or save:
+        result = grab_screen(region)
+
+    if show:
+        cv2.imshow('test', result)
+        if cv2.waitKey(25) & 0xFF == ord('q'):
+            cv2.destroyAllWindows()
+
+    if save:
+        for _ in os.listdir(save_dir):
+            count = count + 1
+        cv2.imwrite('{}/{}.png'.format(save_dir, count), result)
+
+    return region
+
+def detect_time(bluestacks_position, model, not_paused, detect_start=False):
+    if not_paused:
+        right = get_timer_area(bluestacks_position, direction='right')
+        left = get_timer_area(bluestacks_position)
+        left = grab_screen(left)
+        right = grab_screen(right)
+      #  right = np.reshape(right, (1, 1, right[0], right[1]))
+        #right = np.expand_dims(right, axis=3)
+       # right = get_visual_input(bluestacks_position)
+        try:
+            right = np.reshape(right, (1, right.shape[0], right.shape[1], 1))
+            left = np.reshape(left, (1, left.shape[0], left.shape[1], 1))
+
+            prediction_right = model.predict(right)
+            prediction_right = np.argmax(prediction_right)
+
+            prediction_left = model.predict(left)
+            prediction_left = np.argmax(prediction_left)
+
+            final_prediction = prediction_left*10 + prediction_right
+
+            if detect_start == True:
+                if final_prediction == 98:
+                    return True
+                else:
+                    return False
+
+            return final_prediction
+        except ValueError as e:
+            print(e)
+            print(right.shape)
+            print(left.shape)
+            quit()
+       # model.predict()
+    else:
+        print('paused')
+        time.sleep(0.1)
+
+def action_converter(action, bluestacks_position, lock=False):
     come_back = pyautogui.position()
     pyautogui.click(bluestacks_position[0] + 200, bluestacks_position[1] + 200)
     if action == 'block':  # 0
@@ -215,11 +296,11 @@ def action_converter(action, bluestacks_position):
         pyautogui.press('j')
         pyautogui.keyUp('s')
     elif action == 'spinning_step':  # 17
-        pyautogui.keyDown('s')
         pyautogui.keyDown('d')
+        pyautogui.keyDown('s')
         pyautogui.press('j')
-        pyautogui.keyUp('s')
         pyautogui.keyUp('d')
+        pyautogui.keyUp('s')
     elif action == 'horse_kick':  # 18
         pyautogui.keyDown('a')
         pyautogui.keyDown('s')
@@ -256,20 +337,21 @@ def action_converter(action, bluestacks_position):
         pyautogui.keyDown('w')
         pyautogui.keyUp('d')
         pyautogui.keyUp('w')
+    if not lock:
+        pyautogui.moveTo(come_back)
 
-    pyautogui.moveTo(come_back)
-
-    time.sleep(0.3)
+    time.sleep(0.3)  # 0.3
 
 if __name__ == '__main__':
     region_of_ally, region_of_enemy, bluestacks_position = setup_get_hp()
     current_time = time.time()
-    actually_act(14, bluestacks_position)
 
 
     while True:
-        pass
-      #  visual_input = get_visual_input(bluestacks_position)
+        visual_input = get_visual_input(bluestacks_position, for_nn=True)
+
+
+        time.sleep(0.1)
        # visual_input = np.array(visual_input / 255)
         #print(visual_input.shape)
         #print(float(time.time() - current_time))
