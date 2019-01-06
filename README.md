@@ -15,9 +15,10 @@ Example : [This is just an example of a working DQN that works on the cartpole g
 Screen_Grabber : working [not made by me btw]
 
 
+
 ## Usage:
 
-### File 1 : It has been tested on an 1080p resolution and not any other resolution , not sure if it works. Open bluestacks and open it in the smallest possible size then open the game. With file1 you can test the already working functions , from detecting the timer , if the round is paused, hp bars.
+### File 1 : It has been tested on an 1080p resolution and not any other resolution , not sure if it works on other resolutions. Open bluestacks and open it in the smallest possible size then open the game. With file1 you can test the already working functions , from detecting the timer , if the round is paused, hp bars. HINT : To get bluestacks position you need to use the setup function
 
 
 
