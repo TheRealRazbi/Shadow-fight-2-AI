@@ -4,9 +4,9 @@ import pyautogui
 import numpy as np
 import time
 import os
-from keras.models import load_model
+#from keras.models import load_model
 
-timer_model = load_model('time_reader.hdf5')
+#timer_model = load_model('time_reader.hdf5')
 
 def setup_get_hp():
     actual_zone = pyautogui.locateOnScreen('blustack.png')
@@ -50,12 +50,14 @@ def detect_hp(region_of_ally, region_of_enemy):
     return result
 
 
-def get_visual_input(bluestacks_position, delay=0.0, for_nn=False, show=False):
+def get_visual_input(bluestacks_position, delay=0.0, for_nn=0, show=False, delay_per_frame=0.0):
     time.sleep(delay)
     region = [bluestacks_position[0] + 10, bluestacks_position[1] + 42,
               bluestacks_position[0] + 820, bluestacks_position[1] + 500]
 
-    if for_nn is False:
+
+
+    if for_nn < 2:
 
         result = grab_screen(region)
 
@@ -68,31 +70,15 @@ def get_visual_input(bluestacks_position, delay=0.0, for_nn=False, show=False):
         return result
     else:
         result = []
-        result1 = grab_screen(region)
-        if show:
-            cv2.imshow('frame1', result1)
-            if cv2.waitKey(25) & 0xFF == ord('q'):
-                cv2.destroyAllWindows()
+        for i in range(for_nn):
+            resultn = grab_screen(region)
+            if show:
+                cv2.imshow('frame1', resultn)
+                if cv2.waitKey(25) & 0xFF == ord('q'):
+                    cv2.destroyAllWindows()
+            time.sleep(delay_per_frame)
+            result.append(resultn)
 
-        result.append(result1)
-        result2 = grab_screen(region)
-        if show:
-            cv2.imshow('frame2', result2)
-            if cv2.waitKey(25) & 0xFF == ord('q'):
-                cv2.destroyAllWindows()
-        result.append(result2)
-        result3 = grab_screen(region)
-        if show:
-            cv2.imshow('frame3', result3)
-            if cv2.waitKey(25) & 0xFF == ord('q'):
-                cv2.destroyAllWindows()
-        result.append(result3)
-        result4 = grab_screen(region)
-        if show:
-            cv2.imshow('frame4', result4)
-            if cv2.waitKey(25) & 0xFF == ord('q'):
-                cv2.destroyAllWindows()
-        result.append(result4)
 
         result = np.array(result)
 
@@ -253,6 +239,25 @@ def detect_time(bluestacks_position, model, not_paused, detect_start=False):
         print('paused')
         time.sleep(0.1)
 
+
+def pause(bluestacks_position, repeats=1, comeback=False):
+    come_back = pyautogui.position()
+    for i in range(repeats):
+        pyautogui.click(bluestacks_position[0] + 200, bluestacks_position[1] + 200)
+        pyautogui.press('p')
+    if comeback:
+        pyautogui.moveTo(come_back)
+
+
+def resume(bluestacks_position, repeats=1, comeback=False):
+    come_back = pyautogui.position()
+    for i in range(repeats):
+        pyautogui.click(bluestacks_position[0] + 200, bluestacks_position[1] + 200)
+        pyautogui.press('esc')
+    if comeback:
+        pyautogui.moveTo(come_back)
+
+
 def action_converter(action, bluestacks_position, lock=False):
     come_back = pyautogui.position()
     pyautogui.click(bluestacks_position[0] + 200, bluestacks_position[1] + 200)
@@ -358,14 +363,14 @@ def action_converter(action, bluestacks_position, lock=False):
     if not lock:
         pyautogui.moveTo(come_back)
 
-    time.sleep(0.3)  # 0.3
+    time.sleep(0.0)  # 0.3
 
 if __name__ == '__main__':
     region_of_ally, region_of_enemy, bluestacks_position = setup_get_hp()
     current_time = time.time()
 
     while True:
-        visual_input = get_visual_input(bluestacks_position, for_nn=True, show=True, delay=0.3)
+        visual_input = get_visual_input(bluestacks_position, for_nn=20, show=False, delay_per_frame=0.015)
         print("time elapsed", float(-current_time+time.time()))
         current_time = time.time()
      #   time.sleep(999)
